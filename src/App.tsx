@@ -1,35 +1,28 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import "./App.css";
+import { Board, generateBoard } from "./domain/board";
+import { Action, dispatchAction } from "./domain/game";
+import { GameBoard } from "./components/Board";
+
+export type GameCtx = {
+  readonly board: Board;
+  onAction: (a: Action) => void;
+};
+
+const defaultBoard = generateBoard({ width: 9, height: 9, mines: [] });
 
 function App() {
-  const [count, setCount] = useState(0)
-
+  const [board, setBoard] = useState<Board>(defaultBoard);
+  const onAction = (a: Action) => {
+    const newBoard = dispatchAction(a, board);
+    setBoard(newBoard);
+  };
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <h1> Minesweeper Game</h1>
+      <GameBoard board={board} onAction={onAction} />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
