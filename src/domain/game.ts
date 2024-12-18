@@ -1,4 +1,11 @@
-import { Board, Cell, generateBoard, getNeighborMinesCount } from "./board";
+import {
+  Board,
+  Cell,
+  Coords,
+  findUnminedNeighbors,
+  generateBoard,
+  getNeighborMinesCount,
+} from "./board";
 import { match } from "ts-pattern";
 
 export type OpenCell = {
@@ -44,10 +51,10 @@ export const dispatchAction = (action: Action, game: GameState): GameState =>
     });
 
 function dispatchOpenAction(
-  coords: { x: number; y: number },
+  { x, y }: { x: number; y: number },
   board: Board
 ): GameState {
-  const [newBoard, isExploded] = openCell(coords, board);
+  const [newBoard, isExploded] = openCellCascade([x, y], board);
   if (isExploded) return { kind: "lost", board: uncoverAll(newBoard) };
   if (newBoard.minesCount === newBoard.uncoveredCount)
     return { kind: "won", board: uncoverAll(newBoard) };
@@ -76,10 +83,18 @@ function uncoverAll(board: Board): Board {
   return { ...board, cells, uncoveredCount: 0 };
 }
 
-function openCell(
-  { x, y }: { x: number; y: number },
-  board: Board
-): [Board, boolean] {
+type OpenCellResult = {
+  board: Board;
+  isExploded: boolean;
+  neighbors: Coords[];
+};
+
+function openCellCascade(coords: Coords, board: Board): [Board, boolean] {
+  const res = openCell(coords, board);
+  return [res.board, res.isExploded];
+}
+
+function openCell([x, y]: Coords, board: Board): OpenCellResult {
   const cell = board.cells.get(x)?.get(y);
   if (!cell) throw new Error(`Invalid grid cell coordinates ${x},${y}`);
   if (cell.kind !== "covered")
@@ -94,10 +109,20 @@ function openCell(
 
   const isExploded = newCell.kind === "exploded";
   const cells = board.cells.setIn([x, y], newCell);
-  return [
-    { ...board, cells, uncoveredCount: board.uncoveredCount - 1 },
+  const neighbors: Coords[] =
+    newCell.kind === "open_empty" && newCell.neighborMinesCount === 0
+      ? findUnminedNeighbors(board, [x, y])
+      : [];
+  const newBoard = {
+    ...board,
+    cells,
+    uncoveredCount: board.uncoveredCount - 1,
+  };
+  return {
+    board: newBoard,
     isExploded,
-  ];
+    neighbors,
+  };
 }
 
 export function generateGame(): GameState {

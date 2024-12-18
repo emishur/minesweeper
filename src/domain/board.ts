@@ -37,19 +37,21 @@ const isMined = (cell: Cell): boolean =>
     .with({ kind: "open_mined" }, () => true)
     .exhaustive();
 
+export type Coords = [number, number];
+
 const offsets = [-1, 0, 1];
 const coordOffsets = offsets
   .flatMap((x) => offsets.map((y) => [x, y]))
   .filter(([x, y]) => !(x === 0 && y === 0));
 
-export function getNeighborMinesCount(
-  board: Board,
-  [x, y]: [number, number]
-): number {
-  const neighborCoords = coordOffsets
-    .map(([dX, dY]) => [x + dX, y + dY])
+const findNeighborCoords = (board: Board, [x, y]: Coords): Coords[] =>
+  coordOffsets
+    .map(([dX, dY]): Coords => [x + dX, y + dY])
     .filter(([x, _]) => x >= 0 && x < board.width)
     .filter(([_, y]) => y >= 0 && y < board.height);
+
+export function getNeighborMinesCount(board: Board, [x, y]: Coords): number {
+  const neighborCoords = findNeighborCoords(board, [x, y]);
 
   const count = neighborCoords
     .map(([x, y]): number => {
@@ -61,10 +63,19 @@ export function getNeighborMinesCount(
   return count;
 }
 
+export function findUnminedNeighbors(board: Board, [x, y]: Coords): Coords[] {
+  const neighborCoords = findNeighborCoords(board, [x, y]);
+  return neighborCoords.filter(([x, y]) => {
+    const cell = board.cells.get(x)?.get(y);
+    if (!cell) throw new Error(`Cannot access cell with coordinates ${x},${y}`);
+    if (cell.kind === "covered" && !cell.isMined) return true;
+  });
+}
+
 export type GameSeed = {
   width: number;
   height: number;
-  mines: [number, number][];
+  mines: Coords[];
 };
 
 export function generateBoard(seed: GameSeed): Board {
