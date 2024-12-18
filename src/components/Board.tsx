@@ -1,13 +1,12 @@
 import { memo } from "react";
 import { GameCtx } from "../App";
 import * as Immutable from "immutable";
-import { Cell } from "../domain/board";
+import { Board, Cell } from "../domain/board";
 import { Action } from "../domain/game";
 import assertNever from "../assert-never";
 
 export const GameBoard = memo(
-  ({ board, onAction }: GameCtx) => {
-    console.log("render", board.width);
+  ({ board, onAction }: { board: Board; onAction: (a: Action) => void }) => {
     const cells = board.cells.flatMap((row, x) =>
       row.map((cell, y) => (
         <GameCell x={x} y={y} cell={cell} onAction={onAction} />
@@ -87,6 +86,7 @@ const GameOpenCell = ({
         justifyContent: "center",
         aspectRatio: "1/ 1",
         background: "#F0F0F0",
+        fontWeight: "bold",
       }}
       key={`${x}:${y}`}
     >
