@@ -44,7 +44,7 @@ function GameScore({ board, message }: { board: Board; message: string }) {
       >
         {message}
       </div>
-      <div>Uncovered: {board.uncoveredCount}</div>
+      <div>Remain: {board.uncoveredCount}</div>
     </div>
   );
 }
@@ -52,8 +52,9 @@ function GameScore({ board, message }: { board: Board; message: string }) {
 function GamePlay({ game, onAction }: GameCtx) {
   return (
     <>
-      <GameScore board={game.board} message="***" />
+      <GameScore board={game.board} message="" />
       <GameBoard board={game.board} onAction={onAction} />;
+      <div />
     </>
   );
 }

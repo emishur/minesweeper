@@ -55,7 +55,25 @@ function dispatchOpenAction(
 }
 
 function uncoverAll(board: Board): Board {
-  return board;
+  const cells = board.cells.map((row, x) =>
+    row.map((cell, y) =>
+      match<Cell>(cell)
+        .returnType<Cell>()
+        .with({ kind: "open_empty" }, (c) => c)
+        .with({ kind: "exploded" }, (c) => c)
+        .with({ kind: "open_mined" }, (c) => c)
+        .with({ kind: "covered" }, (c) =>
+          c.isMined
+            ? { kind: "open_mined" }
+            : {
+                kind: "open_empty",
+                neighborMinesCount: getNeighborMinesCount(board, [x, y]),
+              }
+        )
+        .exhaustive()
+    )
+  );
+  return { ...board, cells, uncoveredCount: 0 };
 }
 
 function openCell(
