@@ -40,7 +40,7 @@ export type GameState = GamePlay | GameWon | GameLost;
 export const dispatchAction = (action: Action, game: GameState): GameState =>
   match<[GameState, Action]>([game, action])
     .with([{ kind: "play" }, { kind: "open" }], ([game, action]) =>
-      dispatchOpenAction(action, game.board)
+      dispatchOpenAction({ x: action.x, y: action.y }, game.board)
     )
     .with([{ kind: "won" }, { kind: "reset" }], () => generateGame())
     .with([{ kind: "lost" }, { kind: "reset" }], () => generateGame())
@@ -50,11 +50,8 @@ export const dispatchAction = (action: Action, game: GameState): GameState =>
       );
     });
 
-function dispatchOpenAction(
-  { x, y }: { x: number; y: number },
-  board: Board
-): GameState {
-  const [newBoard, isExploded] = openCellCascade([x, y], board);
+function dispatchOpenAction(coords: Coords, board: Board): GameState {
+  const [newBoard, isExploded] = openCellCascade(coords, board);
   if (isExploded) return { kind: "lost", board: uncoverAll(newBoard) };
   if (newBoard.minesCount === newBoard.uncoveredCount)
     return { kind: "won", board: uncoverAll(newBoard) };
@@ -74,7 +71,7 @@ function uncoverAll(board: Board): Board {
             ? { kind: "open_mined" }
             : {
                 kind: "open_empty",
-                neighborMinesCount: getNeighborMinesCount(board, [x, y]),
+                neighborMinesCount: getNeighborMinesCount(board, { x, y }),
               }
         )
         .exhaustive()
@@ -89,12 +86,31 @@ type OpenCellResult = {
   neighbors: Coords[];
 };
 
+const coordsKey = ({ x, y }: Coords): string => `${x}:${y}`;
+
 function openCellCascade(coords: Coords, board: Board): [Board, boolean] {
-  const res = openCell(coords, board);
-  return [res.board, res.isExploded];
+  let cellsToOpen = new Map<string, Coords>();
+  cellsToOpen.set(coordsKey(coords), coords);
+  let currentBoard = board;
+  while (true) {
+    if (cellsToOpen.size === 0) return [currentBoard, false];
+
+    const entry = cellsToOpen.entries().next().value;
+    if (!entry) return [currentBoard, false];
+    const [nextKey, next] = entry;
+
+    const res = openCell(next, currentBoard);
+
+    currentBoard = res.board;
+    cellsToOpen.delete(nextKey);
+    const neighborsMap = new Map<string, Coords>(
+      res.neighbors.map((n): [string, Coords] => [coordsKey(n), n])
+    );
+    cellsToOpen = new Map<string, Coords>([...cellsToOpen, ...neighborsMap]);
+  }
 }
 
-function openCell([x, y]: Coords, board: Board): OpenCellResult {
+function openCell({ x, y }: Coords, board: Board): OpenCellResult {
   const cell = board.cells.get(x)?.get(y);
   if (!cell) throw new Error(`Invalid grid cell coordinates ${x},${y}`);
   if (cell.kind !== "covered")
@@ -104,14 +120,14 @@ function openCell([x, y]: Coords, board: Board): OpenCellResult {
     ? { kind: "exploded" }
     : {
         kind: "open_empty",
-        neighborMinesCount: getNeighborMinesCount(board, [x, y]),
+        neighborMinesCount: getNeighborMinesCount(board, { x, y }),
       };
 
   const isExploded = newCell.kind === "exploded";
   const cells = board.cells.setIn([x, y], newCell);
   const neighbors: Coords[] =
     newCell.kind === "open_empty" && newCell.neighborMinesCount === 0
-      ? findUnminedNeighbors(board, [x, y])
+      ? findUnminedNeighbors(board, { x, y })
       : [];
   const newBoard = {
     ...board,
@@ -127,8 +143,8 @@ function openCell([x, y]: Coords, board: Board): OpenCellResult {
 
 export function generateGame(): GameState {
   const board = generateBoard({
-    width: 3,
-    height: 3,
+    width: 6,
+    height: 6,
     mines: [
       [1, 1],
       [0, 2],
