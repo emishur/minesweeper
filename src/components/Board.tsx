@@ -3,6 +3,7 @@ import { GameCtx } from "../App";
 import * as Immutable from "immutable";
 import { Cell } from "../domain/board";
 import { Action } from "../domain/game";
+import assertNever from "../assert-never";
 
 export const GameBoard = memo(
   ({ board, onAction }: GameCtx) => {
@@ -63,7 +64,7 @@ const GameCell = memo(
       case "covered":
         return <GameCoveredCell x={x} y={y} onAction={onAction} />;
       default:
-        const _: never = cell;
+        assertNever(cell);
     }
   },
   (prev, curr) => Immutable.is(prev, curr)
@@ -109,7 +110,7 @@ const GameCoveredCell = ({
       onClick={() => onAction({ kind: "open", x, y })}
       style={{
         aspectRatio: "1/ 1",
-        background: "#F0F0F0",
+        background: "#C0C0C0",
       }}
     />
   );
