@@ -1,5 +1,5 @@
 import { Board, Cell, getNeighborMinesCount } from "./board";
-import assertNever from "../assert-never";
+import { match } from "ts-pattern";
 
 export type OpenCell = {
   kind: "open";
@@ -7,7 +7,11 @@ export type OpenCell = {
   y: number;
 };
 
-export type Action = OpenCell;
+export type Reset = {
+  kind: "reset";
+};
+
+export type Action = OpenCell | Reset;
 
 export type GamePlay = {
   kind: "play";
@@ -26,32 +30,28 @@ export type GameLost = {
 
 export type GameState = GamePlay | GameWon | GameLost;
 
-export function dispatchAction(action: Action, game: GameState): GameState {
-  switch (game.kind) {
-    case "play":
-      return dispatchPlayAction(action, game.board);
-    case "won":
-      return dispatchPlayAction(action, game.board);
-    case "lost":
-      return dispatchPlayAction(action, game.board);
-    default:
-      assertNever(game);
-      return game;
-  }
-}
+export const dispatchAction = (action: Action, game: GameState): GameState =>
+  match<[GameState, Action]>([game, action])
+    .with([{ kind: "play" }, { kind: "open" }], ([game, action]) =>
+      dispatchOpenAction(action, game.board)
+    )
+    .with([{ kind: "won" }, { kind: "reset" }], () => game)
+    .with([{ kind: "lost" }, { kind: "reset" }], () => game)
+    .otherwise(([state, action]): never => {
+      throw new Error(
+        `Invalid action ${action.kind} for game state ${state.kind}`
+      );
+    });
 
-function dispatchPlayAction(action: Action, board: Board): GameState {
-  switch (action.kind) {
-    case "open":
-      const [newBoard, isExploded] = openCell(action, board);
-      if (isExploded) return { kind: "lost", board: uncoverAll(newBoard) };
-      if (newBoard.minesCount === newBoard.uncoveredCount)
-        return { kind: "won", board: uncoverAll(newBoard) };
-      return { kind: "play", board: newBoard };
-    default:
-      assertNever(action.kind);
-      throw new Error(`Unsupported action ${action}`);
-  }
+function dispatchOpenAction(
+  coords: { x: number; y: number },
+  board: Board
+): GameState {
+  const [newBoard, isExploded] = openCell(coords, board);
+  if (isExploded) return { kind: "lost", board: uncoverAll(newBoard) };
+  if (newBoard.minesCount === newBoard.uncoveredCount)
+    return { kind: "won", board: uncoverAll(newBoard) };
+  return { kind: "play", board: newBoard };
 }
 
 function uncoverAll(board: Board): Board {

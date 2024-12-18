@@ -1,21 +1,14 @@
 import { GameBoard } from "./Board";
 import { GameCtx } from "../App";
-import assertNever from "../assert-never";
 import { Board } from "../domain/board";
+import { match } from "ts-pattern";
 
-export function Game({ game, onAction }: GameCtx) {
-  switch (game.kind) {
-    case "play":
-      return <GamePlay game={game} onAction={onAction} />;
-    case "won":
-      return <GameWon game={game} onAction={onAction} />;
-    case "lost":
-      return <GameLost game={game} onAction={onAction} />;
-    default:
-      assertNever(game);
-      return <></>;
-  }
-}
+export const Game = ({ game, onAction }: GameCtx) =>
+  match(game)
+    .with({ kind: "play" }, () => <GamePlay game={game} onAction={onAction} />)
+    .with({ kind: "won" }, () => <GameWon game={game} onAction={onAction} />)
+    .with({ kind: "lost" }, () => <GameLost game={game} onAction={onAction} />)
+    .exhaustive();
 
 function GameScore({ board, message }: { board: Board; message: string }) {
   return (

@@ -1,5 +1,5 @@
 import { List, Range } from "immutable";
-import assertNever from "../assert-never";
+import { match } from "ts-pattern";
 
 export type CoveredCell = {
   kind: "covered";
@@ -29,21 +29,13 @@ export type Board = {
   cells: List<List<Cell>>;
 };
 
-function isMined(cell: Cell): boolean {
-  switch (cell.kind) {
-    case "covered":
-      return cell.isMined;
-    case "exploded":
-      return true;
-    case "open_empty":
-      return false;
-    case "open_mined":
-      return true;
-    default:
-      assertNever(cell);
-      return false;
-  }
-}
+const isMined = (cell: Cell): boolean =>
+  match(cell)
+    .with({ kind: "covered" }, ({ isMined }) => isMined)
+    .with({ kind: "exploded" }, () => true)
+    .with({ kind: "open_empty" }, () => false)
+    .with({ kind: "open_mined" }, () => true)
+    .exhaustive();
 
 const offsets = [-1, 0, 1];
 const coordOffsets = offsets

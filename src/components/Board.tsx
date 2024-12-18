@@ -1,9 +1,8 @@
 import { memo } from "react";
-import { GameCtx } from "../App";
 import * as Immutable from "immutable";
 import { Board, Cell } from "../domain/board";
 import { Action } from "../domain/game";
-import assertNever from "../assert-never";
+import { match } from "ts-pattern";
 
 export const GameBoard = memo(
   ({ board, onAction }: { board: Board; onAction: (a: Action) => void }) => {
@@ -42,30 +41,23 @@ const GameCell = memo(
     y: number;
     cell: Cell;
     onAction: (a: Action) => void;
-  }) => {
-    switch (cell.kind) {
-      case "open_empty":
-        return (
-          <GameOpenCell
-            x={x}
-            y={y}
-            text={
-              cell.neighborMinesCount === 0
-                ? ""
-                : cell.neighborMinesCount.toString()
-            }
-          />
-        );
-      case "exploded":
-        return <GameOpenCell x={x} y={y} text="🔥" />;
-      case "open_mined":
-        return <GameOpenCell x={x} y={y} text="💣" />;
-      case "covered":
-        return <GameCoveredCell x={x} y={y} onAction={onAction} />;
-      default:
-        assertNever(cell);
-    }
-  },
+  }) =>
+    match<Cell>(cell)
+      .with({ kind: "open_empty" }, ({ neighborMinesCount }) => (
+        <GameOpenCell
+          x={x}
+          y={y}
+          text={neighborMinesCount === 0 ? "" : neighborMinesCount.toString()}
+        />
+      ))
+      .with({ kind: "exploded" }, () => <GameOpenCell x={x} y={y} text="🔥" />)
+      .with({ kind: "open_mined" }, () => (
+        <GameOpenCell x={x} y={y} text="💣" />
+      ))
+      .with({ kind: "covered" }, () => (
+        <GameCoveredCell x={x} y={y} onAction={onAction} />
+      ))
+      .exhaustive(),
   (prev, curr) => Immutable.is(prev, curr)
 );
 
