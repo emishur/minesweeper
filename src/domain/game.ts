@@ -8,6 +8,6 @@ export type OpenCell = {
 
 export type Action = OpenCell;
 
-export function dispatchAction(action: Action, board: Board): Board {
+export function dispatchAction(_: Action, board: Board): Board {
   return board;
 }
