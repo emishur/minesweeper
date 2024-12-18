@@ -8,7 +8,13 @@ export const GameBoard = memo(
   ({ board, onAction }: { board: Board; onAction: (a: Action) => void }) => {
     const cells = board.cells.flatMap((row, x) =>
       row.map((cell, y) => (
-        <GameCell x={x} y={y} cell={cell} onAction={onAction} />
+        <GameCell
+          key={`${x}:${y}`}
+          x={x}
+          y={y}
+          cell={cell}
+          onAction={onAction}
+        />
       ))
     );
     return (
