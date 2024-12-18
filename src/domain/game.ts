@@ -1,4 +1,4 @@
-import { Board, Cell } from "./board";
+import { Board, Cell, getNeighborMinesCount } from "./board";
 import assertNever from "../assert-never";
 
 export type OpenCell = {
@@ -27,7 +27,10 @@ function openCell({ x, y }: { x: number; y: number }, board: Board): Board {
 
   const newCell: Cell = cell.isMined
     ? { kind: "exploded" }
-    : { kind: "open_empty", neighborMinesCount: 0 };
+    : {
+        kind: "open_empty",
+        neighborMinesCount: getNeighborMinesCount(board, [x, y]),
+      };
 
   const cells = board.cells.setIn([x, y], newCell);
   return { ...board, cells, uncoveredCount: board.uncoveredCount - 1 };

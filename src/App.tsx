@@ -11,7 +11,14 @@ export type GameCtx = {
 
 function App() {
   const [board, setBoard] = useState<Board>(() =>
-    generateBoard({ width: 9, height: 9, mines: [] })
+    generateBoard({
+      width: 16,
+      height: 16,
+      mines: [
+        [1, 1],
+        [0, 2],
+      ],
+    })
   );
   const onAction = (a: Action) => {
     const newBoard = dispatchAction(a, board);
