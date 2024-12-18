@@ -1,7 +1,6 @@
 import { useState } from "react";
 import "./App.css";
-import { generateBoard } from "./domain/board";
-import { Action, dispatchAction, GameState } from "./domain/game";
+import { Action, dispatchAction, GameState, generateGame } from "./domain/game";
 import { Game } from "./components/Game";
 
 export type GameCtx = {
@@ -10,17 +9,7 @@ export type GameCtx = {
 };
 
 function App() {
-  const [game, setGame] = useState<GameState>(() => {
-    const board = generateBoard({
-      width: 16,
-      height: 16,
-      mines: [
-        [1, 1],
-        [0, 2],
-      ],
-    });
-    return { kind: "play", board };
-  });
+  const [game, setGame] = useState<GameState>(() => generateGame());
   const onAction = (a: Action) => {
     const newGame = dispatchAction(a, game);
     setGame(newGame);

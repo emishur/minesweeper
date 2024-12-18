@@ -1,4 +1,4 @@
-import { Board, Cell, getNeighborMinesCount } from "./board";
+import { Board, Cell, generateBoard, getNeighborMinesCount } from "./board";
 import { match } from "ts-pattern";
 
 export type OpenCell = {
@@ -35,8 +35,8 @@ export const dispatchAction = (action: Action, game: GameState): GameState =>
     .with([{ kind: "play" }, { kind: "open" }], ([game, action]) =>
       dispatchOpenAction(action, game.board)
     )
-    .with([{ kind: "won" }, { kind: "reset" }], () => game)
-    .with([{ kind: "lost" }, { kind: "reset" }], () => game)
+    .with([{ kind: "won" }, { kind: "reset" }], () => generateGame())
+    .with([{ kind: "lost" }, { kind: "reset" }], () => generateGame())
     .otherwise(([state, action]): never => {
       throw new Error(
         `Invalid action ${action.kind} for game state ${state.kind}`
@@ -80,4 +80,16 @@ function openCell(
     { ...board, cells, uncoveredCount: board.uncoveredCount - 1 },
     isExploded,
   ];
+}
+
+export function generateGame(): GameState {
+  const board = generateBoard({
+    width: 3,
+    height: 3,
+    mines: [
+      [1, 1],
+      [0, 2],
+    ],
+  });
+  return { kind: "play", board };
 }
