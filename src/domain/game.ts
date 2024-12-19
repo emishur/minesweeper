@@ -100,6 +100,7 @@ function openCellCascade(coords: Coords, board: Board): [Board, boolean] {
     const [nextKey, next] = entry;
 
     const res = openCell(next, currentBoard);
+    if (res.isExploded) return [res.board, true];
 
     currentBoard = res.board;
     cellsToOpen.delete(nextKey);
@@ -143,8 +144,8 @@ function openCell({ x, y }: Coords, board: Board): OpenCellResult {
 
 export function generateGame(): GameState {
   const board = generateBoard({
-    width: 6,
-    height: 6,
+    width: 16,
+    height: 16,
     mines: [
       [1, 1],
       [0, 2],
