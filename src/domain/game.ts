@@ -2,8 +2,10 @@ import {
   Board,
   Cell,
   Coords,
+  coordsKey,
   findUnminedNeighbors,
   generateBoard,
+  generateMines,
   getNeighborMinesCount,
 } from "./board";
 import { match } from "ts-pattern";
@@ -125,8 +127,6 @@ type OpenCellResult = {
   neighbors: Coords[];
 };
 
-const coordsKey = ({ row, col }: Coords): string => `${row}:${col}`;
-
 function openCellCascade(coords: Coords, board: Board): [Board, boolean] {
   let cellsToOpen = new Map<string, Coords>();
   cellsToOpen.set(coordsKey(coords), coords);
@@ -204,34 +204,4 @@ function openCellOnStart(coords: Coords, board: Board): GameState {
     mines,
   });
   return openCellOnPlay(coords, newBoard);
-}
-
-function generateMines(
-  exclude: Coords,
-  {
-    width,
-    height,
-    minesCount,
-  }: {
-    width: number;
-    height: number;
-    minesCount: number;
-  }
-): [number, number][] {
-  const placed = new Map([[coordsKey(exclude), exclude]]);
-  while (placed.size < minesCount + 1) {
-    const row = randomIntFromInterval(0, height);
-    const col = randomIntFromInterval(0, width);
-    const coords = { row, col };
-    placed.set(coordsKey(coords), coords);
-  }
-  placed.delete(coordsKey(exclude));
-  return [...placed.values()].map(({ row, col }): [number, number] => [
-    row,
-    col,
-  ]);
-}
-function randomIntFromInterval(min: number, max: number): number {
-  // min included max excluded
-  return Math.floor(Math.random() * (max - min) + min);
 }

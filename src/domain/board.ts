@@ -39,6 +39,8 @@ const isMined = (cell: Cell): boolean =>
 
 export type Coords = { row: number; col: number };
 
+export const coordsKey = ({ row, col }: Coords): string => `${row}:${col}`;
+
 const offsets = [-1, 0, 1];
 const coordOffsets = offsets
   .flatMap((row) => offsets.map((col) => ({ row, col })))
@@ -101,4 +103,34 @@ export function generateBoard(seed: GameSeed): Board {
     minesCount: seed.mines.length,
     uncoveredCount: seed.width * seed.height,
   };
+}
+
+export function generateMines(
+  exclude: Coords,
+  {
+    width,
+    height,
+    minesCount,
+  }: {
+    width: number;
+    height: number;
+    minesCount: number;
+  }
+): [number, number][] {
+  const placed = new Map([[coordsKey(exclude), exclude]]);
+  while (placed.size < minesCount + 1) {
+    const row = randomIntFromInterval(0, height);
+    const col = randomIntFromInterval(0, width);
+    const coords = { row, col };
+    placed.set(coordsKey(coords), coords);
+  }
+  placed.delete(coordsKey(exclude));
+  return [...placed.values()].map(({ row, col }): [number, number] => [
+    row,
+    col,
+  ]);
+}
+function randomIntFromInterval(min: number, max: number): number {
+  // min included max excluded
+  return Math.floor(Math.random() * (max - min) + min);
 }
