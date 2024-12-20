@@ -56,8 +56,13 @@ const GameCell = memo(
       ))
       .with({ kind: "exploded" }, () => <GameOpenCell text="🔥" />)
       .with({ kind: "open_mined" }, () => <GameOpenCell text="💣" />)
-      .with({ kind: "covered" }, () => (
-        <GameCoveredCell row={row} col={col} onAction={onAction} />
+      .with({ kind: "covered" }, ({ isFlagged }) => (
+        <GameCoveredCell
+          row={row}
+          col={col}
+          isFlagged={isFlagged}
+          onAction={onAction}
+        />
       ))
       .exhaustive(),
   (prev, curr) => Immutable.is(prev, curr)
@@ -86,12 +91,15 @@ const GameOpenCell = ({ text }: { text: string }) => {
 const GameCoveredCell = ({
   row,
   col,
+  isFlagged,
   onAction,
 }: {
   row: number;
   col: number;
+  isFlagged: boolean;
   onAction: (a: Action) => void;
 }) => {
+  const text = isFlagged ? "🚩" : "";
   return (
     <button
       onClick={() => onAction({ kind: "open", row, col })}
@@ -103,6 +111,8 @@ const GameCoveredCell = ({
         e.preventDefault();
         onAction({ kind: "flag", row, col });
       }}
-    />
+    >
+      {text}
+    </button>
   );
 };
