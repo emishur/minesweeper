@@ -47,8 +47,8 @@ const coordOffsets = offsets
 const findNeighborCoords = (board: Board, { x, y }: Coords): Coords[] =>
   coordOffsets
     .map((d): Coords => ({ x: x + d.x, y: y + d.y }))
-    .filter(({ x }) => x >= 0 && x < board.width)
-    .filter(({ y }) => y >= 0 && y < board.height);
+    .filter(({ x }) => x >= 0 && x < board.height)
+    .filter(({ y }) => y >= 0 && y < board.width);
 
 export function getNeighborMinesCount(board: Board, coords: Coords): number {
   const neighborCoords = findNeighborCoords(board, coords);
