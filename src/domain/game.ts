@@ -33,6 +33,11 @@ export type GameSelect = {
   kind: "select";
 };
 
+export type GameStart = {
+  kind: "start";
+  board: Board;
+};
+
 export type GamePlay = {
   kind: "play";
   board: Board;
@@ -48,15 +53,18 @@ export type GameLost = {
   board: Board;
 };
 
-export type GameState = GameSelect | GamePlay | GameWon | GameLost;
+export type GameState = GameSelect | GameStart | GamePlay | GameWon | GameLost;
 
 export const dispatchAction = (action: Action, game: GameState): GameState =>
   match<[GameState, Action]>([game, action])
     .with([{ kind: "select" }, { kind: "new" }], ([_, action]) =>
       newGame(action)
     )
+    .with([{ kind: "start" }, { kind: "open" }], ([game, action]) =>
+      openCellOnStart({ x: action.x, y: action.y }, game.board)
+    )
     .with([{ kind: "play" }, { kind: "open" }], ([game, action]) =>
-      dispatchOpenAction({ x: action.x, y: action.y }, game.board)
+      openCellOnPlay({ x: action.x, y: action.y }, game.board)
     )
     .with([{ kind: "won" }, { kind: "reset" }], ([{ board }]) =>
       newGameFromBoard(board)
@@ -78,7 +86,7 @@ export const dispatchAction = (action: Action, game: GameState): GameState =>
       );
     });
 
-function dispatchOpenAction(coords: Coords, board: Board): GameState {
+function openCellOnPlay(coords: Coords, board: Board): GameState {
   const [newBoard, isExploded] = openCellCascade(coords, board);
   if (isExploded) return { kind: "lost", board: uncoverAll(newBoard) };
   if (newBoard.minesCount === newBoard.uncoveredCount)
@@ -179,10 +187,19 @@ function newGame(action: NewGame): GameState {
   const board = generateBoard({
     width: action.width,
     height: action.height,
+    mines: [],
+  });
+  return { kind: "start", board };
+}
+
+function openCellOnStart(coords: Coords, board: Board): GameState {
+  const newBoard = generateBoard({
+    width: board.width,
+    height: board.height,
     mines: [
       [1, 1],
       [0, 2],
     ],
   });
-  return { kind: "play", board };
+  return openCellOnPlay(coords, newBoard);
 }

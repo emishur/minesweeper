@@ -16,6 +16,9 @@ export const Game = ({ game, onAction }: GameCtx) => (
   >
     {match(game)
       .with({ kind: "select" }, () => <SelectGame onAction={onAction} />)
+      .with({ kind: "start" }, ({ board }) => (
+        <GamePlay board={board} onAction={onAction} />
+      ))
       .with({ kind: "play" }, ({ board }) => (
         <GamePlay board={board} onAction={onAction} />
       ))
