@@ -17,7 +17,9 @@ export type OpenCell = {
 export type Reset = {
   kind: "reset";
 };
-
+export type Select = {
+  kind: "select";
+};
 export type NewGame = {
   kind: "new";
   width: number;
@@ -25,7 +27,7 @@ export type NewGame = {
   mines: number;
 };
 
-export type Action = OpenCell | Reset | NewGame;
+export type Action = Select | OpenCell | Reset | NewGame;
 
 export type GameSelect = {
   kind: "select";
@@ -50,6 +52,10 @@ export type GameState = GameSelect | GamePlay | GameWon | GameLost;
 
 export const dispatchAction = (action: Action, game: GameState): GameState =>
   match<[GameState, Action]>([game, action])
+    .with([{}, { kind: "select" }], (): GameState => ({ kind: "select" }))
+    .with([{ kind: "select" }, { kind: "new" }], ([_, action]) =>
+      newGame(action)
+    )
     .with([{ kind: "play" }, { kind: "open" }], ([game, action]) =>
       dispatchOpenAction({ x: action.x, y: action.y }, game.board)
     )
@@ -150,7 +156,10 @@ function openCell({ x, y }: Coords, board: Board): OpenCellResult {
   };
 }
 
-export function generateGame(): GameState {
+function newGame(action: NewGame): GameState {
+  return generateGame();
+}
+function generateGame(): GameState {
   const board = generateBoard({
     width: 16,
     height: 16,

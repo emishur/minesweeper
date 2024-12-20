@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "./App.css";
-import { Action, dispatchAction, GameState, generateGame } from "./domain/game";
+import { Action, dispatchAction, GameState } from "./domain/game";
 import { Game } from "./components/Game";
 
 export type GameCtx = {

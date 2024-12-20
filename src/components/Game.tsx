@@ -36,18 +36,34 @@ function SelectGame({ onAction }: { onAction: (a: Action) => void }) {
       <div
         style={{ display: "flex", justifyContent: "space-evenly", gap: "1rem" }}
       >
-        <button type="button" id="easy">
+        <ActionButton
+          onClick={() =>
+            onAction({ kind: "new", width: 8, height: 8, mines: 9 })
+          }
+        >
           Easy 8 X 8
-        </button>
-        <button type="button" id="classic">
+        </ActionButton>
+        <ActionButton
+          onClick={() =>
+            onAction({ kind: "new", width: 9, height: 9, mines: 10 })
+          }
+        >
           Classic 9 X 9
-        </button>
-        <button type="button" id="medium">
+        </ActionButton>
+        <ActionButton
+          onClick={() =>
+            onAction({ kind: "new", width: 16, height: 16, mines: 40 })
+          }
+        >
           Medium 16 X 16
-        </button>
-        <button type="button" id="expert">
+        </ActionButton>
+        <ActionButton
+          onClick={() =>
+            onAction({ kind: "new", width: 30, height: 16, mines: 99 })
+          }
+        >
           Expert 30 X 16
-        </button>
+        </ActionButton>
       </div>
     </fieldset>
   );
@@ -94,11 +110,7 @@ function GameWon({ board, onAction }: BoardCtx) {
     <>
       <GameScore board={board} message="You won!!!" />
       <GameBoard board={board} onAction={onAction} />
-      <div>
-        <ActionButton onClick={() => onAction({ kind: "reset" })}>
-          ResetGame
-        </ActionButton>
-      </div>
+      <EndOfGameButtons onAction={onAction} />
     </>
   );
 }
@@ -108,12 +120,27 @@ function GameLost({ board, onAction }: BoardCtx) {
     <>
       <GameScore board={board} message="You lost" />
       <GameBoard board={board} onAction={onAction} />
-      <div>
-        <ActionButton onClick={() => onAction({ kind: "reset" })}>
-          Reset Game
-        </ActionButton>
-      </div>
+      <EndOfGameButtons onAction={onAction} />
     </>
+  );
+}
+
+function EndOfGameButtons({ onAction }: { onAction: (a: Action) => void }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-around",
+        gap: "1rem",
+      }}
+    >
+      <ActionButton onClick={() => onAction({ kind: "reset" })}>
+        Reset Game
+      </ActionButton>
+      <ActionButton onClick={() => onAction({ kind: "select" })}>
+        Different Game
+      </ActionButton>
+    </div>
   );
 }
 
