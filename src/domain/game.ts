@@ -93,21 +93,18 @@ function openCellCascade(coords: Coords, board: Board): [Board, boolean] {
   cellsToOpen.set(coordsKey(coords), coords);
   let currentBoard = board;
   while (true) {
-    if (cellsToOpen.size === 0) return [currentBoard, false];
-
-    const entry = cellsToOpen.entries().next().value;
+    const [entry, ...tail] = [...cellsToOpen];
     if (!entry) return [currentBoard, false];
-    const [nextKey, next] = entry;
+    const [_, next] = entry;
 
     const res = openCell(next, currentBoard);
     if (res.isExploded) return [res.board, true];
 
     currentBoard = res.board;
-    cellsToOpen.delete(nextKey);
     const neighborsMap = new Map<string, Coords>(
       res.neighbors.map((n): [string, Coords] => [coordsKey(n), n])
     );
-    cellsToOpen = new Map<string, Coords>([...cellsToOpen, ...neighborsMap]);
+    cellsToOpen = new Map<string, Coords>([...tail, ...neighborsMap]);
   }
 }
 
