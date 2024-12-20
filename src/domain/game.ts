@@ -18,7 +18,18 @@ export type Reset = {
   kind: "reset";
 };
 
-export type Action = OpenCell | Reset;
+export type NewGame = {
+  kind: "new";
+  width: number;
+  height: number;
+  mines: number;
+};
+
+export type Action = OpenCell | Reset | NewGame;
+
+export type GameSelect = {
+  kind: "select";
+};
 
 export type GamePlay = {
   kind: "play";
@@ -35,7 +46,7 @@ export type GameLost = {
   board: Board;
 };
 
-export type GameState = GamePlay | GameWon | GameLost;
+export type GameState = GameSelect | GamePlay | GameWon | GameLost;
 
 export const dispatchAction = (action: Action, game: GameState): GameState =>
   match<[GameState, Action]>([game, action])

@@ -3,6 +3,7 @@ import { GameCtx } from "../App";
 import { Board } from "../domain/board";
 import { match } from "ts-pattern";
 import { ReactNode } from "react";
+import { Action } from "../domain/game";
 
 export const Game = ({ game, onAction }: GameCtx) => (
   <div
@@ -14,16 +15,41 @@ export const Game = ({ game, onAction }: GameCtx) => (
     }}
   >
     {match(game)
-      .with({ kind: "play" }, () => (
-        <GamePlay game={game} onAction={onAction} />
+      .with({ kind: "select" }, () => <SelectGame onAction={onAction} />)
+      .with({ kind: "play" }, ({ board }) => (
+        <GamePlay board={board} onAction={onAction} />
       ))
-      .with({ kind: "won" }, () => <GameWon game={game} onAction={onAction} />)
-      .with({ kind: "lost" }, () => (
-        <GameLost game={game} onAction={onAction} />
+      .with({ kind: "won" }, ({ board }) => (
+        <GameWon board={board} onAction={onAction} />
+      ))
+      .with({ kind: "lost" }, ({ board }) => (
+        <GameLost board={board} onAction={onAction} />
       ))
       .exhaustive()}
   </div>
 );
+
+function SelectGame({ onAction }: { onAction: (a: Action) => void }) {
+  return (
+    <fieldset>
+      <legend>Select Game</legend>
+      <div>
+        <button type="button" id="easy">
+          Easy 8 X 8
+        </button>
+        <button type="button" id="classic">
+          Classic 9 X 9
+        </button>
+        <button type="button" id="medium">
+          Medium 16 X 16
+        </button>
+        <button type="button" id="expert">
+          Expert 30 X 16
+        </button>
+      </div>
+    </fieldset>
+  );
+}
 
 function GameScore({ board, message }: { board: Board; message: string }) {
   return (
@@ -49,21 +75,23 @@ function GameScore({ board, message }: { board: Board; message: string }) {
   );
 }
 
-function GamePlay({ game, onAction }: GameCtx) {
+type BoardCtx = { board: Board; onAction: (a: Action) => void };
+
+function GamePlay({ board, onAction }: BoardCtx) {
   return (
     <>
-      <GameScore board={game.board} message="" />
-      <GameBoard board={game.board} onAction={onAction} />;
+      <GameScore board={board} message="" />
+      <GameBoard board={board} onAction={onAction} />;
       <div />
     </>
   );
 }
 
-function GameWon({ game, onAction }: GameCtx) {
+function GameWon({ board, onAction }: BoardCtx) {
   return (
     <>
-      <GameScore board={game.board} message="You won!!!" />
-      <GameBoard board={game.board} onAction={onAction} />
+      <GameScore board={board} message="You won!!!" />
+      <GameBoard board={board} onAction={onAction} />
       <div>
         <ActionButton onClick={() => onAction({ kind: "reset" })}>
           ResetGame
@@ -73,11 +101,11 @@ function GameWon({ game, onAction }: GameCtx) {
   );
 }
 
-function GameLost({ game, onAction }: GameCtx) {
+function GameLost({ board, onAction }: BoardCtx) {
   return (
     <>
-      <GameScore board={game.board} message="You lost" />
-      <GameBoard board={game.board} onAction={onAction} />
+      <GameScore board={board} message="You lost" />
+      <GameBoard board={board} onAction={onAction} />
       <div>
         <ActionButton onClick={() => onAction({ kind: "reset" })}>
           Reset Game
