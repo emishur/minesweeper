@@ -58,8 +58,12 @@ export const dispatchAction = (action: Action, game: GameState): GameState =>
     .with([{ kind: "play" }, { kind: "open" }], ([game, action]) =>
       dispatchOpenAction({ x: action.x, y: action.y }, game.board)
     )
-    .with([{ kind: "won" }, { kind: "reset" }], () => generateGame())
-    .with([{ kind: "lost" }, { kind: "reset" }], () => generateGame())
+    .with([{ kind: "won" }, { kind: "reset" }], ([{ board }]) =>
+      newGameFromBoard(board)
+    )
+    .with([{ kind: "lost" }, { kind: "reset" }], ([{ board }]) =>
+      newGameFromBoard(board)
+    )
     .with(
       [{ kind: "won" }, { kind: "select" }],
       (): GameState => ({ kind: "select" })
@@ -163,13 +167,18 @@ function openCell({ x, y }: Coords, board: Board): OpenCellResult {
   };
 }
 
+const newGameFromBoard = (board: Board): GameState =>
+  newGame({
+    kind: "new",
+    width: board.width,
+    height: board.height,
+    mines: board.minesCount,
+  });
+
 function newGame(action: NewGame): GameState {
-  return generateGame();
-}
-function generateGame(): GameState {
   const board = generateBoard({
-    width: 16,
-    height: 16,
+    width: action.width,
+    height: action.height,
     mines: [
       [1, 1],
       [0, 2],

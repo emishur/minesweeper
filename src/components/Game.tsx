@@ -59,10 +59,10 @@ function SelectGame({ onAction }: { onAction: (a: Action) => void }) {
         </ActionButton>
         <ActionButton
           onClick={() =>
-            onAction({ kind: "new", width: 30, height: 16, mines: 99 })
+            onAction({ kind: "new", width: 16, height: 30, mines: 99 })
           }
         >
-          Expert 30 X 16
+          Expert 16 X 30
         </ActionButton>
       </div>
     </fieldset>
