@@ -52,7 +52,6 @@ export type GameState = GameSelect | GamePlay | GameWon | GameLost;
 
 export const dispatchAction = (action: Action, game: GameState): GameState =>
   match<[GameState, Action]>([game, action])
-    .with([{}, { kind: "select" }], (): GameState => ({ kind: "select" }))
     .with([{ kind: "select" }, { kind: "new" }], ([_, action]) =>
       newGame(action)
     )
@@ -61,6 +60,14 @@ export const dispatchAction = (action: Action, game: GameState): GameState =>
     )
     .with([{ kind: "won" }, { kind: "reset" }], () => generateGame())
     .with([{ kind: "lost" }, { kind: "reset" }], () => generateGame())
+    .with(
+      [{ kind: "won" }, { kind: "select" }],
+      (): GameState => ({ kind: "select" })
+    )
+    .with(
+      [{ kind: "lost" }, { kind: "select" }],
+      (): GameState => ({ kind: "select" })
+    )
     .otherwise(([state, action]): never => {
       throw new Error(
         `Invalid action ${action.kind} for game state ${state.kind}`
