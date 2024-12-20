@@ -37,7 +37,12 @@ function SelectGame({ onAction }: { onAction: (a: Action) => void }) {
     <fieldset>
       <legend>Select Game</legend>
       <div
-        style={{ display: "flex", justifyContent: "space-evenly", gap: "1rem" }}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-evenly",
+          gap: "1rem",
+        }}
       >
         <ActionButton
           onClick={() =>
@@ -80,7 +85,6 @@ function GameScore({ board, message }: { board: Board; message: string }) {
         justifyContent: "space-between",
         alignItems: "center",
         fontWeight: "bold",
-        fontSize: "2em",
       }}
     >
       <div>Mines: {board.minesCount}</div>
@@ -158,8 +162,8 @@ function ActionButton({
     <button
       style={{
         fontWeight: "bold",
-        fontSize: "2em",
         backgroundColor: "#8080FF",
+        flex: "1 1 0",
       }}
       onClick={onClick}
     >

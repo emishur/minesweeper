@@ -16,8 +16,10 @@ function App() {
   };
   return (
     <>
-      <h1> Minesweeper Game</h1>
-      <Game game={game} onAction={onAction} />
+      <h1> Minesweeper</h1>
+      <div>
+        <Game game={game} onAction={onAction} />
+      </div>
     </>
   );
 }
