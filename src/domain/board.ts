@@ -4,6 +4,7 @@ import { match } from "ts-pattern";
 export type CoveredCell = {
   kind: "covered";
   isMined: boolean;
+  isFlagged: boolean;
 };
 
 export type OpenEmptyCell = {
@@ -26,6 +27,7 @@ export type Board = {
   height: number;
   minesCount: number;
   uncoveredCount: number;
+  flagsCount: number;
   cells: List<List<Cell>>;
 };
 
@@ -91,6 +93,7 @@ export function generateBoard(seed: GameSeed): Board {
             isMined: seed.mines.some(
               ([mrow, mcol]) => mrow === row && mcol === col
             ),
+            isFlagged: false,
           })
         )
         .toList()
@@ -102,6 +105,7 @@ export function generateBoard(seed: GameSeed): Board {
     height: seed.height,
     minesCount: seed.mines.length,
     uncoveredCount: seed.width * seed.height,
+    flagsCount: 0,
   };
 }
 

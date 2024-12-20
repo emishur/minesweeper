@@ -74,6 +74,9 @@ const GameOpenCell = ({ text }: { text: string }) => {
         background: "#F0F0F0",
         fontWeight: "bold",
       }}
+      onContextMenu={(e) => {
+        e.preventDefault();
+      }}
     >
       {text}
     </div>
@@ -95,6 +98,10 @@ const GameCoveredCell = ({
       style={{
         aspectRatio: "1/ 1",
         background: "#C0C0C0",
+      }}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        onAction({ kind: "flag", row, col });
       }}
     />
   );

@@ -91,7 +91,7 @@ function GameScore({ board, message }: { board: Board; message: string }) {
       >
         {message}
       </div>
-      <div>Remain: {board.uncoveredCount}</div>
+      <div>Flags: {board.flagsCount}</div>
     </div>
   );
 }

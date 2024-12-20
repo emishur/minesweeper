@@ -3,6 +3,7 @@ import {
   Cell,
   Coords,
   coordsKey,
+  CoveredCell,
   findUnminedNeighbors,
   generateBoard,
   generateMines,
@@ -29,7 +30,13 @@ export type NewGame = {
   mines: number;
 };
 
-export type Action = Select | OpenCell | Reset | NewGame;
+export type ToggleFlag = {
+  kind: "flag";
+  row: number;
+  col: number;
+};
+
+export type Action = Select | OpenCell | Reset | NewGame | ToggleFlag;
 
 export type GameSelect = {
   kind: "select";
@@ -68,6 +75,20 @@ export const dispatchAction = (action: Action, game: GameState): GameState =>
     .with([{ kind: "play" }, { kind: "open" }], ([game, action]) =>
       openCellOnPlay({ row: action.row, col: action.col }, game.board)
     )
+    .with([{ kind: "play" }, { kind: "flag" }], ([game, action]) => {
+      const board = toggleFlag(
+        { row: action.row, col: action.col },
+        game.board
+      );
+      return { ...game, board };
+    })
+    .with([{ kind: "start" }, { kind: "open" }], ([game, action]) => {
+      const board = toggleFlag(
+        { row: action.row, col: action.col },
+        game.board
+      );
+      return { ...game, board };
+    })
     .with([{ kind: "won" }, { kind: "reset" }], ([{ board }]) =>
       newGameFromBoard(board)
     )
@@ -87,6 +108,22 @@ export const dispatchAction = (action: Action, game: GameState): GameState =>
         `Invalid action ${action.kind} for game state ${state.kind}`
       );
     });
+
+function toggleFlag({ row, col }: Coords, board: Board): Board {
+  const cell = board.cells.get(row)?.get(col);
+  if (!cell) throw new Error(`Cannot access cell ${row}, ${col}`);
+  if (cell.kind !== "covered")
+    throw new Error(`Cannot flag uncovered cell ${row}, ${col}`);
+
+  const newCell: CoveredCell = { ...cell, isFlagged: !cell.isFlagged };
+  const newCells = board.cells.setIn([row, col], newCell);
+  const flagsDelta = newCell.isFlagged ? 1 : -1;
+  return {
+    ...board,
+    cells: newCells,
+    flagsCount: board.flagsCount + flagsDelta,
+  };
+}
 
 function openCellOnPlay(coords: Coords, board: Board): GameState {
   const [newBoard, isExploded] = openCellCascade(coords, board);
