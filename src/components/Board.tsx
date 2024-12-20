@@ -6,12 +6,12 @@ import { match } from "ts-pattern";
 
 export const GameBoard = memo(
   ({ board, onAction }: { board: Board; onAction: (a: Action) => void }) => {
-    const cells = board.cells.flatMap((row, x) =>
-      row.map((cell, y) => (
+    const cells = board.cells.flatMap((row, rowIdx) =>
+      row.map((cell, colIdx) => (
         <GameCell
-          key={`${x}:${y}`}
-          x={x}
-          y={y}
+          key={`${rowIdx}:${colIdx}`}
+          row={rowIdx}
+          col={colIdx}
           cell={cell}
           onAction={onAction}
         />
@@ -38,44 +38,32 @@ export const GameBoard = memo(
 
 const GameCell = memo(
   ({
-    x,
-    y,
+    row,
+    col,
     cell,
     onAction,
   }: {
-    x: number;
-    y: number;
+    row: number;
+    col: number;
     cell: Cell;
     onAction: (a: Action) => void;
   }) =>
     match<Cell>(cell)
       .with({ kind: "open_empty" }, ({ neighborMinesCount }) => (
         <GameOpenCell
-          x={x}
-          y={y}
           text={neighborMinesCount === 0 ? "" : neighborMinesCount.toString()}
         />
       ))
-      .with({ kind: "exploded" }, () => <GameOpenCell x={x} y={y} text="🔥" />)
-      .with({ kind: "open_mined" }, () => (
-        <GameOpenCell x={x} y={y} text="💣" />
-      ))
+      .with({ kind: "exploded" }, () => <GameOpenCell text="🔥" />)
+      .with({ kind: "open_mined" }, () => <GameOpenCell text="💣" />)
       .with({ kind: "covered" }, () => (
-        <GameCoveredCell x={x} y={y} onAction={onAction} />
+        <GameCoveredCell row={row} col={col} onAction={onAction} />
       ))
       .exhaustive(),
   (prev, curr) => Immutable.is(prev, curr)
 );
 
-const GameOpenCell = ({
-  x,
-  y,
-  text,
-}: {
-  x: number;
-  y: number;
-  text: string;
-}) => {
+const GameOpenCell = ({ text }: { text: string }) => {
   return (
     <div
       style={{
@@ -86,7 +74,6 @@ const GameOpenCell = ({
         background: "#F0F0F0",
         fontWeight: "bold",
       }}
-      key={`${x}:${y}`}
     >
       {text}
     </div>
@@ -94,18 +81,17 @@ const GameOpenCell = ({
 };
 
 const GameCoveredCell = ({
-  x,
-  y,
+  row,
+  col,
   onAction,
 }: {
-  x: number;
-  y: number;
+  row: number;
+  col: number;
   onAction: (a: Action) => void;
 }) => {
   return (
     <button
-      key={`${x}:${y}`}
-      onClick={() => onAction({ kind: "open", x, y })}
+      onClick={() => onAction({ kind: "open", row, col })}
       style={{
         aspectRatio: "1/ 1",
         background: "#C0C0C0",

@@ -10,8 +10,8 @@ import { match } from "ts-pattern";
 
 export type OpenCell = {
   kind: "open";
-  x: number;
-  y: number;
+  row: number;
+  col: number;
 };
 
 export type Reset = {
@@ -61,10 +61,10 @@ export const dispatchAction = (action: Action, game: GameState): GameState =>
       newGame(action)
     )
     .with([{ kind: "start" }, { kind: "open" }], ([game, action]) =>
-      openCellOnStart({ x: action.x, y: action.y }, game.board)
+      openCellOnStart({ row: action.row, col: action.col }, game.board)
     )
     .with([{ kind: "play" }, { kind: "open" }], ([game, action]) =>
-      openCellOnPlay({ x: action.x, y: action.y }, game.board)
+      openCellOnPlay({ row: action.row, col: action.col }, game.board)
     )
     .with([{ kind: "won" }, { kind: "reset" }], ([{ board }]) =>
       newGameFromBoard(board)
@@ -95,8 +95,8 @@ function openCellOnPlay(coords: Coords, board: Board): GameState {
 }
 
 function uncoverAll(board: Board): Board {
-  const cells = board.cells.map((row, x) =>
-    row.map((cell, y) =>
+  const cells = board.cells.map((row, rowIdx) =>
+    row.map((cell, colIdx) =>
       match<Cell>(cell)
         .returnType<Cell>()
         .with({ kind: "open_empty" }, (c) => c)
@@ -107,7 +107,10 @@ function uncoverAll(board: Board): Board {
             ? { kind: "open_mined" }
             : {
                 kind: "open_empty",
-                neighborMinesCount: getNeighborMinesCount(board, { x, y }),
+                neighborMinesCount: getNeighborMinesCount(board, {
+                  row: rowIdx,
+                  col: colIdx,
+                }),
               }
         )
         .exhaustive()
@@ -122,7 +125,7 @@ type OpenCellResult = {
   neighbors: Coords[];
 };
 
-const coordsKey = ({ x, y }: Coords): string => `${x}:${y}`;
+const coordsKey = ({ row, col }: Coords): string => `${row}:${col}`;
 
 function openCellCascade(coords: Coords, board: Board): [Board, boolean] {
   let cellsToOpen = new Map<string, Coords>();
@@ -144,24 +147,24 @@ function openCellCascade(coords: Coords, board: Board): [Board, boolean] {
   }
 }
 
-function openCell({ x, y }: Coords, board: Board): OpenCellResult {
-  const cell = board.cells.get(x)?.get(y);
-  if (!cell) throw new Error(`Invalid grid cell coordinates ${x},${y}`);
+function openCell({ row, col }: Coords, board: Board): OpenCellResult {
+  const cell = board.cells.get(row)?.get(col);
+  if (!cell) throw new Error(`Invalid grid cell coordinates ${row},${col}`);
   if (cell.kind !== "covered")
-    throw new Error(`Attempt to open already open cell ${x},${y}`);
+    throw new Error(`Attempt to open already open cell ${row},${col}`);
 
   const newCell: Cell = cell.isMined
     ? { kind: "exploded" }
     : {
         kind: "open_empty",
-        neighborMinesCount: getNeighborMinesCount(board, { x, y }),
+        neighborMinesCount: getNeighborMinesCount(board, { row, col }),
       };
 
   const isExploded = newCell.kind === "exploded";
-  const cells = board.cells.setIn([x, y], newCell);
+  const cells = board.cells.setIn([row, col], newCell);
   const neighbors: Coords[] =
     newCell.kind === "open_empty" && newCell.neighborMinesCount === 0
-      ? findUnminedNeighbors(board, { x, y })
+      ? findUnminedNeighbors(board, { row, col })
       : [];
   const newBoard = {
     ...board,
@@ -195,7 +198,6 @@ function newGame(action: NewGame): GameState {
 
 function openCellOnStart(coords: Coords, board: Board): GameState {
   const mines = generateMines(coords, board);
-  console.log("MINES", mines);
   const newBoard = generateBoard({
     width: board.width,
     height: board.height,
@@ -218,13 +220,16 @@ function generateMines(
 ): [number, number][] {
   const placed = new Map([[coordsKey(exclude), exclude]]);
   while (placed.size < minesCount + 1) {
-    const x = randomIntFromInterval(0, height);
-    const y = randomIntFromInterval(0, width);
-    const coords = { x, y };
+    const row = randomIntFromInterval(0, height);
+    const col = randomIntFromInterval(0, width);
+    const coords = { row, col };
     placed.set(coordsKey(coords), coords);
   }
   placed.delete(coordsKey(exclude));
-  return [...placed.values()].map(({ x, y }): [number, number] => [x, y]);
+  return [...placed.values()].map(({ row, col }): [number, number] => [
+    row,
+    col,
+  ]);
 }
 function randomIntFromInterval(min: number, max: number): number {
   // min included max excluded
