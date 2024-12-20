@@ -75,6 +75,13 @@ export const dispatchAction = (action: Action, game: GameState): GameState =>
     .with([{ kind: "play" }, { kind: "open" }], ([game, action]) =>
       openCellOnPlay({ row: action.row, col: action.col }, game.board)
     )
+    .with([{ kind: "start" }, { kind: "flag" }], ([game, action]) => {
+      const board = toggleFlag(
+        { row: action.row, col: action.col },
+        game.board
+      );
+      return { ...game, board };
+    })
     .with([{ kind: "play" }, { kind: "flag" }], ([game, action]) => {
       const board = toggleFlag(
         { row: action.row, col: action.col },
