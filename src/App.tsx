@@ -9,7 +9,7 @@ export type GameCtx = {
 };
 
 function App() {
-  const [game, setGame] = useState<GameState>(() => generateGame());
+  const [game, setGame] = useState<GameState>({ kind: "select" });
   const onAction = (a: Action) => {
     const newGame = dispatchAction(a, game);
     setGame(newGame);

@@ -33,7 +33,9 @@ function SelectGame({ onAction }: { onAction: (a: Action) => void }) {
   return (
     <fieldset>
       <legend>Select Game</legend>
-      <div>
+      <div
+        style={{ display: "flex", justifyContent: "space-evenly", gap: "1rem" }}
+      >
         <button type="button" id="easy">
           Easy 8 X 8
         </button>
