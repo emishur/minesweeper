@@ -189,17 +189,44 @@ function newGame(action: NewGame): GameState {
     height: action.height,
     mines: [],
   });
+  board.minesCount = action.mines;
   return { kind: "start", board };
 }
 
 function openCellOnStart(coords: Coords, board: Board): GameState {
+  const mines = generateMines(coords, board);
+  console.log("MINES", mines);
   const newBoard = generateBoard({
     width: board.width,
     height: board.height,
-    mines: [
-      [1, 1],
-      [0, 2],
-    ],
+    mines,
   });
   return openCellOnPlay(coords, newBoard);
+}
+
+function generateMines(
+  exclude: Coords,
+  {
+    width,
+    height,
+    minesCount,
+  }: {
+    width: number;
+    height: number;
+    minesCount: number;
+  }
+): [number, number][] {
+  const placed = new Map([[coordsKey(exclude), exclude]]);
+  while (placed.size < minesCount + 1) {
+    const x = randomIntFromInterval(0, height);
+    const y = randomIntFromInterval(0, width);
+    const coords = { x, y };
+    placed.set(coordsKey(coords), coords);
+  }
+  placed.delete(coordsKey(exclude));
+  return [...placed.values()].map(({ x, y }): [number, number] => [x, y]);
+}
+function randomIntFromInterval(min: number, max: number): number {
+  // min included max excluded
+  return Math.floor(Math.random() * (max - min) + min);
 }
