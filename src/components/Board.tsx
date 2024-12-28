@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { CSSProperties, memo } from "react";
 import * as Immutable from "immutable";
 import { Board, Cell } from "../domain/board";
 import { Action } from "../domain/game";
@@ -68,16 +68,21 @@ const GameCell = memo(
   (prev, curr) => Immutable.is(prev, curr)
 );
 
+const cellStyle: CSSProperties = {
+  flex: "1 1 0",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  aspectRatio: "1/ 1",
+  fontWeight: "bold",
+};
+
 const GameOpenCell = ({ text }: { text: string }) => {
   return (
     <div
       style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        aspectRatio: "1/ 1",
+        ...cellStyle,
         background: "#F0F0F0",
-        fontWeight: "bold",
       }}
       onContextMenu={(e) => {
         e.preventDefault();
@@ -101,10 +106,10 @@ const GameCoveredCell = ({
 }) => {
   const text = isFlagged ? "🚩" : "";
   return (
-    <button
+    <div
       onClick={() => onAction({ kind: "open", row, col })}
       style={{
-        aspectRatio: "1/ 1",
+        ...cellStyle,
         background: "#C0C0C0",
       }}
       onContextMenu={(e) => {
@@ -113,6 +118,6 @@ const GameCoveredCell = ({
       }}
     >
       {text}
-    </button>
+    </div>
   );
 };
