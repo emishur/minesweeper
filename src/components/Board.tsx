@@ -3,6 +3,7 @@ import * as Immutable from "immutable";
 import { Board, Cell } from "../domain/board";
 import { Action } from "../domain/game";
 import { match } from "ts-pattern";
+import { useClickHandler } from "./double-click";
 
 export const GameBoard = memo(
   ({ board, onAction }: { board: Board; onAction: (a: Action) => void }) => {
@@ -105,9 +106,13 @@ const GameCoveredCell = ({
   onAction: (a: Action) => void;
 }) => {
   const text = isFlagged ? "🚩" : "";
+  const clickHandler = useClickHandler(
+    () => onAction({ kind: "open", row, col }),
+    () => onAction({ kind: "flag", row, col })
+  );
   return (
     <div
-      onClick={() => onAction({ kind: "open", row, col })}
+      onClick={() => clickHandler()}
       style={{
         ...cellStyle,
         background: "#C0C0C0",
