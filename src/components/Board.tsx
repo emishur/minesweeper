@@ -83,6 +83,7 @@ const GameOpenCell = ({ text }: { text: string }) => {
     <div
       style={{
         ...cellStyle,
+        color: "black",
         background: "#F0F0F0",
       }}
       onContextMenu={(e) => {
