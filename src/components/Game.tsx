@@ -90,7 +90,7 @@ function GameScore({ board, message }: { board: Board; message: string }) {
       <div>Mines: {board.minesCount}</div>
       <div
         style={{
-          color: "blue",
+          color: "#FF7070",
         }}
       >
         {message}
