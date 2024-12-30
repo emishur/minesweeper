@@ -163,6 +163,7 @@ function ActionButton({
       style={{
         fontWeight: "bold",
         backgroundColor: "#8080FF",
+        color: "black",
         flex: "1 1 0",
       }}
       onClick={onClick}
