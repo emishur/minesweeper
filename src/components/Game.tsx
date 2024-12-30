@@ -162,7 +162,7 @@ function ActionButton({
     <button
       style={{
         fontWeight: "bold",
-        backgroundColor: "#8080FF",
+        backgroundColor: "#80B0FF",
         color: "black",
         flex: "1 1 0",
       }}

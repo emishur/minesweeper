@@ -23,6 +23,7 @@ export const GameBoard = memo(
         style={{
           display: "grid",
           gridTemplateColumns: `repeat(${board.width}, 1fr)`,
+          border: "4px solid lightBlue",
           gap: "4px",
           background: "lightBlue",
         }}
@@ -119,7 +120,7 @@ const GameCoveredCell = ({
       }}
       style={{
         ...cellStyle,
-        background: "#C0C0C0",
+        background: "#A0A0A0",
       }}
       onContextMenu={(e) => {
         e.preventDefault();
