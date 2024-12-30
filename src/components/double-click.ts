@@ -4,7 +4,7 @@ export type OnClick = () => void;
 export const useClickHandler = (
   onClick: OnClick,
   onDoubleClick: OnClick,
-  msDelay: number = 300
+  msDelay: number = 200
 ): OnClick => {
   let singleClick: boolean = false;
 

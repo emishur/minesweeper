@@ -112,7 +112,10 @@ const GameCoveredCell = ({
   );
   return (
     <div
-      onClick={() => clickHandler()}
+      onClick={(e) => {
+        e.preventDefault();
+        clickHandler();
+      }}
       style={{
         ...cellStyle,
         background: "#C0C0C0",

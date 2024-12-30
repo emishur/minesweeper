@@ -106,8 +106,8 @@ function GamePlay({ board, onAction }: BoardCtx) {
   return (
     <>
       <GameScore board={board} message="" />
-      <GameBoard board={board} onAction={onAction} />;
-      <div />
+      <GameBoard board={board} onAction={onAction} />
+      <div>Double tap to toggle a flag</div>
     </>
   );
 }
