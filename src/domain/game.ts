@@ -89,13 +89,6 @@ export const dispatchAction = (action: Action, game: GameState): GameState =>
       );
       return { ...game, board };
     })
-    .with([{ kind: "start" }, { kind: "open" }], ([game, action]) => {
-      const board = toggleFlag(
-        { row: action.row, col: action.col },
-        game.board
-      );
-      return { ...game, board };
-    })
     .with([{ kind: "won" }, { kind: "reset" }], ([{ board }]) =>
       newGameFromBoard(board)
     )
