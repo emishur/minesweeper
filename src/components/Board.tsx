@@ -107,7 +107,7 @@ const GameCoveredCell = ({
   isFlagged: boolean;
   onAction: (a: Action) => void;
 }) => {
-  const text = isFlagged ? "🚩" : "X";
+  const text = isFlagged ? "🚩" : "XX";
   const clickHandler = useClickHandler(
     () => onAction({ kind: "open", row, col }),
     () => onAction({ kind: "flag", row, col })
