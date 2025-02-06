@@ -107,7 +107,7 @@ const GameCoveredCell = ({
   isFlagged: boolean;
   onAction: (a: Action) => void;
 }) => {
-  const text = isFlagged ? "🚩" : "";
+  const text = isFlagged ? "🚩" : "X";
   const clickHandler = useClickHandler(
     () => onAction({ kind: "open", row, col }),
     () => onAction({ kind: "flag", row, col })
@@ -121,6 +121,7 @@ const GameCoveredCell = ({
       style={{
         ...cellStyle,
         background: "#A0A0A0",
+        color: "#A0A0A0",
       }}
       onContextMenu={(e) => {
         e.preventDefault();
