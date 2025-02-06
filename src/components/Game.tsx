@@ -115,7 +115,7 @@ function GamePlay({ board, onAction }: BoardCtx) {
 function GameWon({ board, onAction }: BoardCtx) {
   return (
     <>
-      <GameScore board={board} message="You won!!!" />
+      <GameScore board={board} message="😎 You won!!! 😎" />
       <GameBoard board={board} onAction={onAction} />
       <EndOfGameButtons onAction={onAction} />
     </>
@@ -125,7 +125,7 @@ function GameWon({ board, onAction }: BoardCtx) {
 function GameLost({ board, onAction }: BoardCtx) {
   return (
     <>
-      <GameScore board={board} message="You lost" />
+      <GameScore board={board} message="😞 You lost 😞" />
       <GameBoard board={board} onAction={onAction} />
       <EndOfGameButtons onAction={onAction} />
     </>
