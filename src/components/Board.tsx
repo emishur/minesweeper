@@ -87,6 +87,7 @@ const cellStyle: CSSProperties = {
   aspectRatio: "1/ 1",
   fontWeight: "bold",
   userSelect: "none",
+  WebkitUserSelect: "none",
 };
 
 const GameOpenCell = ({
