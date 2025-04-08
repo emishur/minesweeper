@@ -158,8 +158,8 @@ const GameCoveredCell = ({
       onTouchStart={() => {
         if (isIOS) onTouchStart();
       }}
-      onTouchEnd={() => {
-        if (isIOS) onTouchEnd();
+      onTouchEnd={(e) => {
+        if (isIOS) onTouchEnd(() => e.preventDefault());
       }}
     >
       {text}

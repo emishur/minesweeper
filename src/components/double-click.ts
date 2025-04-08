@@ -26,21 +26,30 @@ export const useClickHandler = (
   };
 };
 
+export type CancellableAction = (cancel: () => void) => void;
+
 export const useCustomContextMenu = (
   onContext: OnClick,
   msDelay = 500
-): { onTouchStart: OnClick; onTouchEnd: OnClick } => {
+): { onTouchStart: OnClick; onTouchEnd: CancellableAction } => {
   let timerId: number | null = null;
+  let suppressTouchEnd = false;
   const onTouchStart = () => {
+    suppressTouchEnd = false;
     timerId = setTimeout(() => {
       timerId = null;
+      suppressTouchEnd = true;
       onContext();
     }, msDelay);
   };
-  const onTouchEnd = () => {
+  const onTouchEnd = (cancel: () => void) => {
     if (timerId !== null) {
       clearTimeout(timerId);
       timerId = null;
+    }
+    if (suppressTouchEnd) {
+      suppressTouchEnd = false;
+      cancel();
     }
   };
   return { onTouchStart, onTouchEnd };
