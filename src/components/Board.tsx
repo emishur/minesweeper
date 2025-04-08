@@ -136,12 +136,13 @@ const GameCoveredCell = ({
     toggleFlag,
     250
   );
-  const { onTouchStart, onTouchEnd } = useCustomContextMenu(toggleFlag);
+  const { consumed, onTouchStart, onTouchEnd } =
+    useCustomContextMenu(toggleFlag);
   return (
     <div
       onClick={(e) => {
         e.preventDefault();
-        clickHandler();
+        if (!consumed) clickHandler();
       }}
       style={{
         ...cellStyle,
@@ -158,12 +159,8 @@ const GameCoveredCell = ({
       onTouchStart={() => {
         if (isIOS) onTouchStart();
       }}
-      onTouchEnd={(e) => {
-        if (isIOS)
-          onTouchEnd(() => {
-            e.preventDefault();
-            e.stopPropagation();
-          });
+      onTouchEnd={() => {
+        if (isIOS) onTouchEnd();
       }}
     >
       {text}

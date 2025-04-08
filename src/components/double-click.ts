@@ -1,5 +1,7 @@
 //distinguished between single and double click
 
+import { useState } from "react";
+
 export type OnClick = () => void;
 export const useClickHandler = (
   onClick: OnClick,
@@ -26,31 +28,29 @@ export const useClickHandler = (
   };
 };
 
-export type CancellableAction = (cancel: () => void) => void;
-
 export const useCustomContextMenu = (
   onContext: OnClick,
   msDelay = 500
-): { onTouchStart: OnClick; onTouchEnd: CancellableAction } => {
+): {
+  consumed: boolean;
+  onTouchStart: OnClick;
+  onTouchEnd: OnClick;
+} => {
   let timerId: number | null = null;
-  let suppressTouchEnd = false;
+  let [consumed, setConsumed] = useState(false);
   const onTouchStart = () => {
-    suppressTouchEnd = false;
+    setConsumed(false);
     timerId = setTimeout(() => {
       timerId = null;
-      suppressTouchEnd = true;
+      setConsumed(true);
       onContext();
     }, msDelay);
   };
-  const onTouchEnd = (cancel: () => void) => {
+  const onTouchEnd = () => {
     if (timerId !== null) {
       clearTimeout(timerId);
       timerId = null;
     }
-    if (suppressTouchEnd) {
-      suppressTouchEnd = false;
-      cancel();
-    }
   };
-  return { onTouchStart, onTouchEnd };
+  return { consumed, onTouchStart, onTouchEnd };
 };
