@@ -25,3 +25,23 @@ export const useClickHandler = (
     }
   };
 };
+
+export const useCustomContextMenu = (
+  onContext: OnClick,
+  msDelay = 500
+): { onTouchStart: OnClick; onTouchEnd: OnClick } => {
+  let timerId: number | null = null;
+  const onTouchStart = () => {
+    timerId = setTimeout(() => {
+      timerId = null;
+      onContext();
+    }, msDelay);
+  };
+  const onTouchEnd = () => {
+    if (timerId !== null) {
+      clearTimeout(timerId);
+      timerId = null;
+    }
+  };
+  return { onTouchStart, onTouchEnd };
+};

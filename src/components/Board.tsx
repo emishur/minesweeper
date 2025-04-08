@@ -3,7 +3,7 @@ import * as Immutable from "immutable";
 import { Board, Cell } from "../domain/board";
 import { Action } from "../domain/game";
 import { match } from "ts-pattern";
-import { useClickHandler } from "./double-click";
+import { useClickHandler, useCustomContextMenu } from "./double-click";
 
 export const GameBoard = memo(
   ({ board, onAction }: { board: Board; onAction: (a: Action) => void }) => {
@@ -114,6 +114,8 @@ const GameOpenCell = ({
   );
 };
 
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
 const GameCoveredCell = ({
   row,
   col,
@@ -127,12 +129,14 @@ const GameCoveredCell = ({
   onAction: (a: Action) => void;
   fontSize: string;
 }) => {
+  const toggleFlag = () => onAction({ kind: "flag", row, col });
   const text = isFlagged ? "🚩" : "";
   const clickHandler = useClickHandler(
     () => onAction({ kind: "open", row, col }),
-    () => onAction({ kind: "flag", row, col }),
+    toggleFlag,
     250
   );
+  const { onTouchStart, onTouchEnd } = useCustomContextMenu(toggleFlag);
   return (
     <div
       onClick={(e) => {
@@ -146,8 +150,16 @@ const GameCoveredCell = ({
         fontSize: fontSize,
       }}
       onContextMenu={(e) => {
-        e.preventDefault();
-        onAction({ kind: "flag", row, col });
+        if (!isIOS) {
+          e.preventDefault();
+          toggleFlag();
+        }
+      }}
+      onTouchStart={() => {
+        if (isIOS) onTouchStart();
+      }}
+      onTouchEnd={() => {
+        if (isIOS) onTouchEnd();
       }}
     >
       {text}
