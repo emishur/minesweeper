@@ -1,6 +1,6 @@
 //distinguished between single and double click
 
-import { useState } from "react";
+import { useRef } from "react";
 
 export type OnClick = () => void;
 export const useClickHandler = (
@@ -32,17 +32,18 @@ export const useCustomContextMenu = (
   onContext: OnClick,
   msDelay = 500
 ): {
-  consumed: boolean;
+  consumed: () => boolean;
   onTouchStart: OnClick;
   onTouchEnd: OnClick;
 } => {
   let timerId: number | null = null;
-  let [consumed, setConsumed] = useState(false);
+  useRef(false);
+  let consumedRef = useRef(false);
   const onTouchStart = () => {
-    setConsumed(false);
+    consumedRef.current = false;
     timerId = setTimeout(() => {
       timerId = null;
-      setConsumed(true);
+      consumedRef.current = true;
       onContext();
     }, msDelay);
   };
@@ -52,5 +53,5 @@ export const useCustomContextMenu = (
       timerId = null;
     }
   };
-  return { consumed, onTouchStart, onTouchEnd };
+  return { consumed: () => consumedRef.current, onTouchStart, onTouchEnd };
 };

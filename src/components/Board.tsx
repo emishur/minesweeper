@@ -142,7 +142,7 @@ const GameCoveredCell = ({
     <div
       onClick={(e) => {
         e.preventDefault();
-        if (!consumed) clickHandler();
+        if (!consumed()) clickHandler();
       }}
       style={{
         ...cellStyle,
