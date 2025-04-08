@@ -86,6 +86,7 @@ const cellStyle: CSSProperties = {
   justifyContent: "center",
   aspectRatio: "1/ 1",
   fontWeight: "bold",
+  userSelect: "none",
 };
 
 const GameOpenCell = ({
@@ -128,7 +129,8 @@ const GameCoveredCell = ({
   const text = isFlagged ? "🚩" : "";
   const clickHandler = useClickHandler(
     () => onAction({ kind: "open", row, col }),
-    () => onAction({ kind: "flag", row, col })
+    () => onAction({ kind: "flag", row, col }),
+    250
   );
   return (
     <div
