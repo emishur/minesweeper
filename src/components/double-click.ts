@@ -1,13 +1,13 @@
 //distinguished between single and double click
 
-import { useRef } from "react";
+import { MouseEventHandler, TouchEventHandler, useRef } from "react";
 
-export type OnClick = () => void;
+export type Action = () => void;
 export const useClickHandler = (
-  onClick: OnClick,
-  onDoubleClick: OnClick,
+  onClick: Action,
+  onDoubleClick: Action,
   msDelay: number = 200
-): OnClick => {
+): Action => {
   let singleClick: boolean = false;
 
   const onTimeout = () => {
@@ -28,16 +28,83 @@ export const useClickHandler = (
   };
 };
 
-export const useCustomContextMenu = (
-  onContext: OnClick,
+export type ClickSettings = {
+  onClick?: Action;
+  onDoubleClick?: Action;
+  onContextMenu: Action;
+  msDoubleClickDelay?: number;
+  msContextMenuDelay?: number;
+};
+
+type DefaultContextHandlers = {
+  onContextMenu: MouseEventHandler;
+};
+type IosContextHandlers = {
+  onTouchStart: TouchEventHandler;
+  onTouchEnd: TouchEventHandler;
+};
+type ContextHandlers = DefaultContextHandlers | IosContextHandlers;
+
+export type ClickEventHandlers = {
+  onClick?: MouseEventHandler;
+} & ContextHandlers;
+
+const EmptyAction: Action = () => {};
+
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+export const useClickActionsHandler = (
+  settings: ClickSettings
+): ClickEventHandlers => {
+  const clickHandler = useClickHandler(
+    settings.onClick || EmptyAction,
+    settings.onDoubleClick || EmptyAction,
+    settings.msDoubleClickDelay
+  );
+
+  const ctxCustomHandlers = useCustomContextMenu(
+    settings.onContextMenu,
+    settings.msContextMenuDelay
+  );
+  const ctxHandlers: ContextHandlers = isIOS
+    ? {
+        onTouchStart: () => ctxCustomHandlers.onTouchStart(),
+        onTouchEnd: () => ctxCustomHandlers.onTouchEnd(),
+      }
+    : {
+        onContextMenu: (e) => {
+          e.preventDefault();
+          settings.onContextMenu();
+        },
+      };
+  const onClickHandler: { onClick?: MouseEventHandler } =
+    !settings.onClick && !settings.onDoubleClick
+      ? {} //only context menu action, no need to handle click events
+      : isIOS
+      ? {
+          onClick: (e) => {
+            e.preventDefault();
+            if (!ctxCustomHandlers.consumed()) clickHandler();
+          },
+        }
+      : {
+          onClick: (e) => {
+            e.preventDefault();
+            clickHandler();
+          },
+        };
+  return { ...ctxHandlers, ...onClickHandler };
+};
+
+const useCustomContextMenu = (
+  onContext: Action,
   msDelay = 500
 ): {
   consumed: () => boolean;
-  onTouchStart: OnClick;
-  onTouchEnd: OnClick;
+  onTouchStart: Action;
+  onTouchEnd: Action;
 } => {
   let timerId: number | null = null;
-  useRef(false);
   let consumedRef = useRef(false);
   const onTouchStart = () => {
     consumedRef.current = false;
