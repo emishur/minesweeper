@@ -3,7 +3,24 @@
 import { MouseEventHandler, TouchEventHandler, useRef } from "react";
 
 export type Action = () => void;
-export const useClickHandler = (
+const EmptyAction: Action = () => {};
+
+/**
+ * Discriminates between single and double click actions.
+ * @returns An event handler to use with a component `onClick` event.
+ * @example
+ * ```typescript
+ *  const handler = useDoubleClickHandler(onClick, onDoubleClick);
+ *  ...
+ *  <div onClick={(e) => {
+ *     e.preventDefault();
+ *     handler();
+ *   }}/>
+ *  ...
+ *  </div>
+ * ```
+ */
+export const useDoubleClickHandler = (
   onClick: Action,
   onDoubleClick: Action,
   msDelay: number = 200
@@ -49,14 +66,29 @@ export type ClickEventHandlers = {
   onClick?: MouseEventHandler;
 } & ContextHandlers;
 
-const EmptyAction: Action = () => {};
-
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
+/**
+ * Provides support for a secondary action (`onContextMenu`), triggered by a
+ * right-click on desktop or a tap-and-hold gesture on touch devices (including
+ * iOS Safari).
+ * If you need to handle both secondary action and single/double click events
+ * together, use this hook instead of `useDoubleClickHandler`.
+ * @returns An object containing the necessary event handlers to support
+ * the required interactions.
+ * @example
+ * ```typescript
+ * const handlers = useClickActionsHandler(...);
+ * ...
+ * <div {{...handlers}}>
+ * ...
+ * </div>
+ * ```
+ */
 export const useClickActionsHandler = (
   settings: ClickSettings
 ): ClickEventHandlers => {
-  const clickHandler = useClickHandler(
+  const clickHandler = useDoubleClickHandler(
     settings.onClick || EmptyAction,
     settings.onDoubleClick || EmptyAction,
     settings.msDoubleClickDelay
