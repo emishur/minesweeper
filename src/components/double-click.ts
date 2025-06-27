@@ -31,6 +31,7 @@ export const useDoubleClickHandler = (
   msDelay: number = 200
 ): Action => {
   const singleClick = useRef(false);
+  const timerId = useRef<number | null>(null);
 
   const onTimeout = useCallback(() => {
     if (singleClick.current) {
@@ -42,10 +43,14 @@ export const useDoubleClickHandler = (
   return () => {
     if (singleClick.current) {
       singleClick.current = false;
+      if (timerId.current !== null) {
+        clearTimeout(timerId.current);
+        timerId.current = null;
+      }
       onDoubleClick();
     } else {
       singleClick.current = true;
-      setTimeout(onTimeout, msDelay);
+      timerId.current = setTimeout(onTimeout, msDelay);
     }
   };
 };
