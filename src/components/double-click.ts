@@ -1,6 +1,11 @@
 //distinguished between single and double click
 
-import { MouseEventHandler, TouchEventHandler, useRef } from "react";
+import {
+  MouseEventHandler,
+  TouchEventHandler,
+  useCallback,
+  useRef,
+} from "react";
 
 export type Action = () => void;
 const EmptyAction: Action = () => {};
@@ -25,21 +30,21 @@ export const useDoubleClickHandler = (
   onDoubleClick: Action,
   msDelay: number = 200
 ): Action => {
-  let singleClick: boolean = false;
+  const singleClick = useRef(false);
 
-  const onTimeout = () => {
-    if (singleClick) {
-      singleClick = false;
+  const onTimeout = useCallback(() => {
+    if (singleClick.current) {
+      singleClick.current = false;
       onClick();
     }
-  };
+  }, [onClick]);
 
   return () => {
-    if (singleClick) {
-      singleClick = false;
+    if (singleClick.current) {
+      singleClick.current = false;
       onDoubleClick();
     } else {
-      singleClick = true;
+      singleClick.current = true;
       setTimeout(onTimeout, msDelay);
     }
   };
