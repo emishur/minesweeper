@@ -141,20 +141,20 @@ const useCustomContextMenu = (
   onTouchStart: Action;
   onTouchEnd: Action;
 } => {
-  let timerId: number | null = null;
+  let timerIdRef = useRef<number | null>(null);
   let consumedRef = useRef(false);
   const onTouchStart = () => {
     consumedRef.current = false;
-    timerId = setTimeout(() => {
-      timerId = null;
+    timerIdRef.current = setTimeout(() => {
+      timerIdRef.current = null;
       consumedRef.current = true;
       onContext();
     }, msDelay);
   };
   const onTouchEnd = () => {
-    if (timerId !== null) {
-      clearTimeout(timerId);
-      timerId = null;
+    if (timerIdRef.current !== null) {
+      clearTimeout(timerIdRef.current);
+      timerIdRef.current = null;
     }
   };
   return { consumed: () => consumedRef.current, onTouchStart, onTouchEnd };
